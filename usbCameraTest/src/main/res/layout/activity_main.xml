@@ -44,4 +44,11 @@
         android:scaleType="centerCrop"
         android:src="@android:drawable/ic_menu_camera" />
 
+    <ImageButton
+        android:id="@+id/led_button"
+        android:layout_width="@dimen/button_size"
+        android:layout_height="@dimen/button_size"
+        android:scaleType="centerCrop"
+        android:src="@android:drawable/ic_menu_compass"
+        android:layout_marginLeft="100dp"/>
 </FrameLayout>

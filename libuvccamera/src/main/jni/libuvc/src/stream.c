@@ -799,7 +799,7 @@ static inline void _uvc_process_payload_iso(uvc_stream_handle_t *strmh, struct l
 		// libusb_get_iso_packet_buffer_simple will return NULL
 		uint8_t *pktbuf = libusb_get_iso_packet_buffer_simple(transfer, packet_id);
 		_uvc_process_payload(strmh, pktbuf, pkt->actual_length);
-	}
+    }
 }
 #else
 static inline void _uvc_process_payload_iso(uvc_stream_handle_t *strmh, struct libusb_transfer *transfer) {
@@ -958,6 +958,8 @@ static inline void _uvc_process_payload_iso(uvc_stream_handle_t *strmh, struct l
  *
  * @param transfer Active transfer
  */
+
+
 static void _uvc_stream_callback(struct libusb_transfer *transfer) {
 	if UNLIKELY(!transfer) return;
 
@@ -979,6 +981,8 @@ static void _uvc_stream_callback(struct libusb_transfer *transfer) {
 		} else {
 			/* This is an isochronous mode transfer, so each packet has a payload transfer */
 			_uvc_process_payload_iso(strmh, transfer);
+
+
 		}
 	    break;
 	case LIBUSB_TRANSFER_NO_DEVICE:

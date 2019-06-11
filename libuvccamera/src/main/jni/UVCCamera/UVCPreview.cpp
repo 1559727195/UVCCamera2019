@@ -386,6 +386,31 @@ int UVCPreview::stopPreview() {
 //**********************************************************************
 //
 //**********************************************************************
+// qzm
+ void show_fps()
+ {
+    static int flag = 0;
+    static double fps = 0;
+    static int frames = 0;
+
+    static struct timeval t1, t2;
+    if (flag == 0) {
+        flag = 1;
+        gettimeofday(&t1, NULL);
+    }
+
+    frames++;
+    gettimeofday(&t2, NULL);
+
+    double d = (t2.tv_sec - t1.tv_sec) * 1000000 + t2.tv_usec - t1.tv_usec;
+    if (d >= 1000000) {
+        fps = frames * 1000000.0 / d;
+        frames = 0;
+        t1 = t2;
+        LOGE("qzm fps = %.2lf", fps);
+    }
+ }
+
 void UVCPreview::uvc_preview_frame_callback(uvc_frame_t *frame, void *vptr_args) {
 	UVCPreview *preview = reinterpret_cast<UVCPreview *>(vptr_args);
 	if UNLIKELY(!preview->isRunning() || !frame || !frame->frame_format || !frame->data || !frame->data_bytes) return;
@@ -414,6 +439,8 @@ void UVCPreview::uvc_preview_frame_callback(uvc_frame_t *frame, void *vptr_args)
 			return;
 		}
 		preview->addPreviewFrame(copy);
+
+		//show_fps();
 	}
 }
 

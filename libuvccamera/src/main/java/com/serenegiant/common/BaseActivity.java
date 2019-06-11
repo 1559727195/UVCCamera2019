@@ -39,6 +39,7 @@ import com.serenegiant.dialog.MessageDialogFragmentV4;
 import com.serenegiant.utils.BuildCheck;
 import com.serenegiant.utils.HandlerThreadHandler;
 import com.serenegiant.utils.PermissionCheck;
+import com.serenegiant.uvccamera.R;
 
 /**
  * Created by saki on 2016/11/18.
