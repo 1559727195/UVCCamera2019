@@ -44,11 +44,16 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
         }
     }
+
 	sourceSets {
 		main {
 			jniLibs.srcDir 'src/main/libs'
 			jni.srcDirs = []
 		}
+	}
+
+	lintOptions {
+		abortOnError false
 	}
 }
 
@@ -93,3 +98,8 @@ dependencies {
 		exclude module: 'support-v4'
 	}
 }
+
+
+
+
+
