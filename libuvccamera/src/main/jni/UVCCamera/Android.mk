@@ -64,3 +64,4 @@ LOCAL_SRC_FILES := \
 
 LOCAL_MODULE    := UVCCamera
 include $(BUILD_SHARED_LIBRARY)
+
