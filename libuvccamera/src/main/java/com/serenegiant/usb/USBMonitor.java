@@ -397,7 +397,7 @@ public final class USBMonitor {
 	 */
 	private boolean updatePermission(final UsbDevice device, final boolean hasPermission) {
 		final int deviceKey = getDeviceKey(device, true);
-		synchronized (mHasPermissions) {
+		synchronized (mHasPermissions) {//添加sync好处预防增删并发
 			if (hasPermission) {
 				if (mHasPermissions.get(deviceKey) == null) {
 					mHasPermissions.put(deviceKey, new WeakReference<UsbDevice>(device));
@@ -900,7 +900,7 @@ public final class USBMonitor {
 				final byte[] desc = connection.getRawDescriptors();
 
 				if (TextUtils.isEmpty(info.usb_version)) {
-					info.usb_version = String.format("%x.%02x", ((int)desc[3] & 0xff), ((int)desc[2] & 0xff));
+					info.usb_version = String.format("%x.%02x", ((int)desc[3] & 0xff), ((int)desc[2] & 0xff));//1111 1111
 				}
 				if (TextUtils.isEmpty(info.version)) {
 					info.version = String.format("%x.%02x", ((int)desc[13] & 0xff), ((int)desc[12] & 0xff));
