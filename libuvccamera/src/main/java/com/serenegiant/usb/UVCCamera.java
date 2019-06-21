@@ -23,6 +23,7 @@
 
 package com.serenegiant.usb;
 
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -44,8 +45,8 @@ public class UVCCamera {
     private static final String TAG = UVCCamera.class.getSimpleName();
     private static final String DEFAULT_USBFS = "/dev/bus/usb";
 
-    public static final int DEFAULT_PREVIEW_WIDTH = 640;
-    public static final int DEFAULT_PREVIEW_HEIGHT = 480;
+    public static final int DEFAULT_PREVIEW_WIDTH = 640;//640
+    public static final int DEFAULT_PREVIEW_HEIGHT = 480;//480
     public static final int DEFAULT_PREVIEW_MODE = 0;
     public static final int DEFAULT_PREVIEW_MIN_FPS = 1;
     public static final int DEFAULT_PREVIEW_MAX_FPS = 30;
@@ -430,8 +431,13 @@ public class UVCCamera {
     public synchronized void startPreview() {
         if (mCtrlBlock != null) {
             nativeStartPreview(mNativePtr);
+//            setFrameCallback(mIFrameCallback, UVCCamera.PIXEL_FORMAT_NV21);
         }
     }
+
+    private final IFrameCallback mIFrameCallback = frame -> {
+//        ByteBuffer o = frame;
+    };
 
     /**
      * stop preview

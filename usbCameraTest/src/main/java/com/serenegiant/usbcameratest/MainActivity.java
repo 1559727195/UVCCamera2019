@@ -23,25 +23,32 @@
 
 package com.serenegiant.usbcameratest;
 
+import android.graphics.Bitmap;
 import android.graphics.SurfaceTexture;
 import android.hardware.usb.UsbDevice;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.Log;
 import android.view.Surface;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.Toast;
+
 import com.serenegiant.common.BaseActivity;
 import com.serenegiant.usb.CameraDialog;
 import com.serenegiant.usb.DeviceFilter;
 import com.serenegiant.usb.IButtonCallback;
+import com.serenegiant.usb.IFrameCallback;
 import com.serenegiant.usb.IStatusCallback;
 import com.serenegiant.usb.USBMonitor;
 import com.serenegiant.usb.USBMonitor.OnDeviceConnectListener;
 import com.serenegiant.usb.USBMonitor.UsbControlBlock;
 import com.serenegiant.usb.UVCCamera;
+import com.serenegiant.widget.PreviewView;
 import com.serenegiant.widget.SimpleUVCCameraTextureView;
+
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
@@ -57,10 +64,12 @@ public final class MainActivity extends BaseActivity {
     private ImageButton mCameraButton;
     private Surface mPreviewSurface;
 
-    private int MY_W = 1280;
-    private int MY_H = 720;
+    private int MY_W = 640;
+    private int MY_H = 480;
     private int MY_FORMAT = UVCCamera.FRAME_FORMAT_MJPEG;
     private List<UsbDevice> list_devices = new ArrayList<>();
+    private ImageView imageview;
+    private PreviewView previewView;
 
 
     @Override
@@ -69,9 +78,13 @@ public final class MainActivity extends BaseActivity {
         setContentView(R.layout.activity_main);
         mCameraButton = (ImageButton) findViewById(R.id.camera_button);
         mCameraButton.setOnClickListener(mOnClickListener);
+        imageview = findViewById(R.id.imageview);
 
-        mUVCCameraView = (SimpleUVCCameraTextureView) findViewById(R.id.UVCCameraTextureView1);
-        mUVCCameraView.setAspectRatio(UVCCamera.DEFAULT_PREVIEW_WIDTH / (float) UVCCamera.DEFAULT_PREVIEW_HEIGHT);
+        previewView = (PreviewView) findViewById(R.id.preview_view);
+        previewView.setScaleType(PreviewView.ScaleType.FIT_WIDTH);
+        previewView.getTextureView().setScaleX(-1);
+//        mUVCCameraView = (SimpleUVCCameraTextureView) findViewById(R.id.UVCCameraTextureView1);
+//        mUVCCameraView.setAspectRatio(UVCCamera.DEFAULT_PREVIEW_WIDTH / (float) UVCCamera.DEFAULT_PREVIEW_HEIGHT);
 
         mUSBMonitor = new USBMonitor(this, mOnDeviceConnectListener);
 
@@ -160,7 +173,7 @@ public final class MainActivity extends BaseActivity {
                 mUSBMonitor = null;
             }
         }
-        mUVCCameraView = null;
+//        mUVCCameraView = null;
         mCameraButton = null;
         super.onDestroy();
     }
@@ -247,11 +260,12 @@ public final class MainActivity extends BaseActivity {
                     }
                 }
 
-                final SurfaceTexture st = mUVCCameraView.getSurfaceTexture();
+                final SurfaceTexture st = previewView.getTextureView().getSurfaceTexture();
+                previewView.setPreviewSize(MY_W, MY_H);
                 if (st != null) {
                     mPreviewSurface = new Surface(st);
                     camera.setPreviewDisplay(mPreviewSurface);
-//						camera.setFrameCallback(mIFrameCallback, UVCCamera.PIXEL_FORMAT_RGB565/*UVCCamera.PIXEL_FORMAT_NV21*/);
+                    camera.setFrameCallback(mIFrameCallback, UVCCamera.PIXEL_FORMAT_NV21);
                     camera.startPreview();
                 }
 
@@ -323,24 +337,8 @@ public final class MainActivity extends BaseActivity {
 
     // if you need frame data as byte array on Java side, you can use this callback method with UVCCamera#setFrameCallback
     // if you need to create Bitmap in IFrameCallback, please refer following snippet.
-/*	final Bitmap bitmap = Bitmap.createBitmap(UVCCamera.DEFAULT_PREVIEW_WIDTH, UVCCamera.DEFAULT_PREVIEW_HEIGHT, Bitmap.Config.RGB_565);
-	private final IFrameCallback mIFrameCallback = new IFrameCallback() {
-		@Override
-		public void onFrame(final ByteBuffer frame) {
-			frame.clear();
-			synchronized (bitmap) {
-				bitmap.copyPixelsFromBuffer(frame);
-			}
-			mImageView.post(mUpdateImageTask);
-		}
-	};
-	
-	private final Runnable mUpdateImageTask = new Runnable() {
-		@Override
-		public void run() {
-			synchronized (bitmap) {
-				mImageView.setImageBitmap(bitmap);
-			}
-		}
-	}; */
+    private final IFrameCallback mIFrameCallback = frame -> {
+        byte[] data = new byte[frame.remaining()];
+        frame.get(data);
+    };
 }
