@@ -3,6 +3,8 @@
  */
 package com.serenegiant.widget;
 
+import android.animation.AnimatorSet;
+import android.animation.ObjectAnimator;
 import android.content.Context;
 import android.graphics.Matrix;
 import android.graphics.RectF;
@@ -13,7 +15,12 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 import android.view.TextureView;
+import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.FrameLayout;
+
+import com.serenegiant.usbcameratest.R;
 
 
 /**
@@ -26,6 +33,8 @@ public class TexturePreviewView extends FrameLayout implements PreviewView, Aspe
     private int videoWidth = 0;
     private int videoHeight = 0;
     private boolean mirrored = true;
+    private Animation animation;
+    private boolean landscape;
 
     public TexturePreviewView(@NonNull Context context) {
         super(context);
@@ -46,11 +55,13 @@ public class TexturePreviewView extends FrameLayout implements PreviewView, Aspe
 
     private void init() {
         textureView = new TextureView(getContext());
+        animation = AnimationUtils.loadAnimation(getContext(), R.anim.scale_big);
         addView(textureView);
     }
 
     /**
      * 有些ImageSource如系统相机前置设置头为镜面效果。这样换算坐标的时候会不一样
+     *
      * @param mirrored 是否为镜面效果。
      */
     public void setMirrored(boolean mirrored) {
@@ -70,12 +81,39 @@ public class TexturePreviewView extends FrameLayout implements PreviewView, Aspe
             int targetWith = videoWidth * selfHeight / videoHeight;
             int delta = (targetWith - selfWidth) / 2;
             textureView.layout(left - delta, top, right + delta, bottom);
+            if (landscape) {
+                TexturePreviewView.this.setScaleX(1.0f);
+                TexturePreviewView.this.setScaleY(1.0f);
+            }
         } else {
             int targetHeight = videoHeight * selfWidth / videoWidth;
             int delta = (targetHeight - selfHeight) / 2;
-            textureView.layout(left, top - delta, right, bottom + delta);
+//            textureView.layout(left, top - delta, right, bottom + delta);//0,-441,1200,1783-441
+
+            textureView.layout(left, top - delta, right, bottom + delta);//0,-441,1200,1783-441-宽度已达到边界
+            // 计算缩放比例.
+            float scaleWidth = ((float) selfWidth) / videoHeight;
+            float scaleHeight = ((float) selfHeight) / videoWidth;
+            landscape = true;
+            TexturePreviewView.this.setScaleX(1.5f);
+            TexturePreviewView.this.setScaleY(1.4f);
         }
     }
+
+
+    private void setScale(View v, float scale) {
+        ObjectAnimator scaleX = ObjectAnimator.ofFloat(v, "scaleX", v.getScaleX(), scale);
+        ObjectAnimator scaleY = ObjectAnimator.ofFloat(v, "scaleY", v.getScaleY(), scale);
+        //组合
+        AnimatorSet animatorSet = new AnimatorSet();
+        //放到一起
+        animatorSet.play(scaleX).with(scaleY);
+        animatorSet.setDuration(500);
+        // animationSet.setRepeatMode(Animation.RESTART);
+        // animationSet.setRepeatCount(1);
+        animatorSet.start();
+    }
+
 
     @Override
     public void setAspectRatio(final double aspectRatio) {
@@ -98,38 +136,38 @@ public class TexturePreviewView extends FrameLayout implements PreviewView, Aspe
 
     }
 
-    @Override
-    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-
-        if (mRequestedAspect > 0) {
-            int initialWidth = MeasureSpec.getSize(widthMeasureSpec);
-            int initialHeight = MeasureSpec.getSize(heightMeasureSpec);
-
-            final int horizPadding = getPaddingLeft() + getPaddingRight();
-            final int vertPadding = getPaddingTop() + getPaddingBottom();
-            initialWidth -= horizPadding;
-            initialHeight -= vertPadding;
-
-            final double viewAspectRatio = (double)initialWidth / initialHeight;
-            final double aspectDiff = mRequestedAspect / viewAspectRatio - 1;
-
-            if (Math.abs(aspectDiff) > 0.01) {
-                if (aspectDiff > 0) {
-                    // width priority decision
-                    initialHeight = (int) (initialWidth / mRequestedAspect);
-                } else {
-                    // height priority decison
-                    initialWidth = (int) (initialHeight * mRequestedAspect);
-                }
-                initialWidth += horizPadding;
-                initialHeight += vertPadding;
-                widthMeasureSpec = MeasureSpec.makeMeasureSpec(initialWidth, MeasureSpec.EXACTLY);
-                heightMeasureSpec = MeasureSpec.makeMeasureSpec(initialHeight, MeasureSpec.EXACTLY);
-            }
-        }
-
-        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-    }
+//    @Override
+//    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+//
+//        if (mRequestedAspect > 0) {
+//            int initialWidth = MeasureSpec.getSize(widthMeasureSpec);
+//            int initialHeight = MeasureSpec.getSize(heightMeasureSpec);
+//
+//            final int horizPadding = getPaddingLeft() + getPaddingRight();
+//            final int vertPadding = getPaddingTop() + getPaddingBottom();
+//            initialWidth -= horizPadding;
+//            initialHeight -= vertPadding;
+//
+//            final double viewAspectRatio = (double)initialWidth / initialHeight;
+//            final double aspectDiff = mRequestedAspect / viewAspectRatio - 1;
+//
+//            if (Math.abs(aspectDiff) > 0.01) {
+//                if (aspectDiff > 0) {
+//                    // width priority decision
+//                    initialHeight = (int) (initialWidth / mRequestedAspect);
+//                } else {
+//                    // height priority decison
+//                    initialWidth = (int) (initialHeight * mRequestedAspect);
+//                }
+//                initialWidth += horizPadding;
+//                initialHeight += vertPadding;
+//                widthMeasureSpec = MeasureSpec.makeMeasureSpec(initialWidth, MeasureSpec.EXACTLY);
+//                heightMeasureSpec = MeasureSpec.makeMeasureSpec(initialHeight, MeasureSpec.EXACTLY);
+//            }
+//        }
+//
+//        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+//    }
 
 
     @Override
@@ -223,7 +261,13 @@ public class TexturePreviewView extends FrameLayout implements PreviewView, Aspe
 
     @Override
     public void setScaleType(ScaleType scaleType) {
-//        this.scaleType = scaleType;
+        this.scaleType = scaleType;
+        handler.post(new Runnable() {
+            @Override
+            public void run() {
+                requestLayout();
+            }
+        });
     }
 
     @Override

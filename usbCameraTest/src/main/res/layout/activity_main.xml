@@ -54,4 +54,12 @@
         android:layout_marginLeft="100dp"
         android:scaleType="centerCrop"
         android:src="@android:drawable/ic_menu_compass" />
+
+    <ImageButton
+        android:id="@+id/circle_button"
+        android:layout_width="@dimen/button_size"
+        android:layout_height="@dimen/button_size"
+        android:layout_marginLeft="200dp"
+        android:scaleType="centerCrop"
+        android:src="@android:drawable/ic_menu_compass" />
 </FrameLayout>

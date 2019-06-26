@@ -165,7 +165,7 @@ uvc_error_t uvc_set_ae_priority(uvc_device_handle_t *devh, uint8_t priority) {
     return UVC_SUCCESS;
   else
     return ret;
-}
+}//--------------
 
 uvc_error_t uvc_get_exposure_abs(uvc_device_handle_t *devh, int *time, enum uvc_req_code req_code) {
   uint8_t data[4];

@@ -23,6 +23,9 @@
 
 package com.serenegiant.usbcameratest;
 
+import android.animation.ObjectAnimator;
+import android.animation.ValueAnimator;
+import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.SurfaceTexture;
 import android.hardware.usb.UsbDevice;
@@ -48,12 +51,12 @@ import com.serenegiant.usb.USBMonitor.UsbControlBlock;
 import com.serenegiant.usb.UVCCamera;
 import com.serenegiant.widget.PreviewView;
 import com.serenegiant.widget.SimpleUVCCameraTextureView;
+import com.serenegiant.widget.TexturePreviewView;
 
-import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
-public final class MainActivity extends BaseActivity {
+public final class MainActivity extends BaseActivity implements OnClickListener {
 
     private final Object mSync = new Object();
     // for accessing USB and USB camera
@@ -70,6 +73,9 @@ public final class MainActivity extends BaseActivity {
     private List<UsbDevice> list_devices = new ArrayList<>();
     private ImageView imageview;
     private PreviewView previewView;
+    private View container;
+    private View circle_button;
+    private ValueAnimator objectAnimator;
 
 
     @Override
@@ -79,12 +85,23 @@ public final class MainActivity extends BaseActivity {
         mCameraButton = (ImageButton) findViewById(R.id.camera_button);
         mCameraButton.setOnClickListener(mOnClickListener);
         imageview = findViewById(R.id.imageview);
-
+        container = findViewById(R.id.container);
+        circle_button = findViewById(R.id.circle_button);
+        circle_button.setOnClickListener(this);
         previewView = (PreviewView) findViewById(R.id.preview_view);
-        previewView.setScaleType(PreviewView.ScaleType.FIT_WIDTH);
+//        previewView.setScaleType(PreviewView.ScaleType.FIT_WIDTH);
         previewView.getTextureView().setScaleX(-1);
 //        mUVCCameraView = (SimpleUVCCameraTextureView) findViewById(R.id.UVCCameraTextureView1);
 //        mUVCCameraView.setAspectRatio(UVCCamera.DEFAULT_PREVIEW_WIDTH / (float) UVCCamera.DEFAULT_PREVIEW_HEIGHT);
+
+        boolean isPortrait = getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT;
+        if (isPortrait) {
+            previewView.setScaleType(PreviewView.ScaleType.FIT_HEIGHT);
+            // 相机坚屏模式
+        } else {
+            previewView.setScaleType(PreviewView.ScaleType.FIT_WIDTH);
+            // 相机横屏模式
+        }
 
         mUSBMonitor = new USBMonitor(this, mOnDeviceConnectListener);
 
@@ -272,6 +289,9 @@ public final class MainActivity extends BaseActivity {
                 synchronized (mSync) {
                     mUVCCamera = camera;
                 }
+
+//                previewView.animate().rotation(90);
+//                container.setRotation(90);
             }, 0);
         }
 
@@ -341,4 +361,29 @@ public final class MainActivity extends BaseActivity {
         byte[] data = new byte[frame.remaining()];
         frame.get(data);
     };
+
+    boolean istrue;
+
+    @Override
+    public void onClick(View view) {
+        switch (view.getId()) {
+            case R.id.circle_button://屏幕旋转0度或者90度
+//                container.setRotation(!istrue == true ? 90: 0);
+                if (istrue) {
+                    istrue = false;
+                    objectAnimator = ObjectAnimator.ofFloat(previewView, "rotation", 0f);
+                    previewView.setScaleType(PreviewView.ScaleType.FIT_HEIGHT);
+//                    previewView.setPreviewSize(MY_W, MY_H);
+
+                } else {
+                    istrue = true;
+                    objectAnimator = ObjectAnimator.ofFloat(previewView, "rotation", 90f);
+                    previewView.setScaleType(PreviewView.ScaleType.FIT_WIDTH);
+//                    previewView.setPreviewSize(MY_H, MY_W);
+                }
+                objectAnimator.setDuration(100);
+                objectAnimator.start();
+                break;
+        }
+    }
 }

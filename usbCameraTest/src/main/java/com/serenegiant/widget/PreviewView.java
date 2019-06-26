@@ -12,6 +12,7 @@ import android.view.TextureView;
 
 public interface PreviewView {
 
+
     /**
      * 图片帧缩放类型。
      */
