@@ -71,7 +71,7 @@ EXTERN(void) jpeg_make_d_derived_tbl
  */
 
 #if !defined(_WIN32) && !defined(SIZEOF_SIZE_T)
-#error Cannot determine word size
+//#error Cannot determine word size
 #endif
 
 #if SIZEOF_SIZE_T==8 || defined(_WIN64)

@@ -53,6 +53,7 @@ import com.serenegiant.widget.PreviewView;
 import com.serenegiant.widget.SimpleUVCCameraTextureView;
 import com.serenegiant.widget.TexturePreviewView;
 
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -121,6 +122,37 @@ public final class MainActivity extends BaseActivity implements OnClickListener 
                 }
             }
         });
+
+        getSerialNumber();
+    }
+
+
+    /**
+
+     * getSerialNumber
+
+     * @return result is same to getSerialNumber1()
+
+     */
+
+    public static String getSerialNumber(){
+
+        String serial = null;
+
+        try {
+
+            Class<?> c =Class.forName("android.os.SystemProperties");
+
+            Method get =c.getMethod("get", String.class);
+
+            serial = (String)get.invoke(c, "ro.serialno");
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return serial;
+
     }
 
     @Override
@@ -369,21 +401,28 @@ public final class MainActivity extends BaseActivity implements OnClickListener 
         switch (view.getId()) {
             case R.id.circle_button://屏幕旋转0度或者90度
 //                container.setRotation(!istrue == true ? 90: 0);
-                if (istrue) {
-                    istrue = false;
-                    objectAnimator = ObjectAnimator.ofFloat(previewView, "rotation", 0f);
-                    previewView.setScaleType(PreviewView.ScaleType.FIT_HEIGHT);
-//                    previewView.setPreviewSize(MY_W, MY_H);
-
-                } else {
-                    istrue = true;
-                    objectAnimator = ObjectAnimator.ofFloat(previewView, "rotation", 90f);
-                    previewView.setScaleType(PreviewView.ScaleType.FIT_WIDTH);
-//                    previewView.setPreviewSize(MY_H, MY_W);
-                }
-                objectAnimator.setDuration(100);
-                objectAnimator.start();
+                preview_rotation();
                 break;
         }
+    }
+
+    /**
+     * 屏幕旋转0/90度
+     */
+    private void preview_rotation() {
+        if (istrue) {
+            istrue = false;
+            objectAnimator = ObjectAnimator.ofFloat(previewView, "rotation", 0f);
+            previewView.setScaleType(PreviewView.ScaleType.FIT_HEIGHT);
+//                    previewView.setPreviewSize(MY_W, MY_H);
+
+        } else {
+            istrue = true;
+            objectAnimator = ObjectAnimator.ofFloat(previewView, "rotation", 90f);
+            previewView.setScaleType(PreviewView.ScaleType.FIT_WIDTH);
+//                    previewView.setPreviewSize(MY_H, MY_W);
+        }
+        objectAnimator.setDuration(100);
+        objectAnimator.start();
     }
 }
