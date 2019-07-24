@@ -190,7 +190,7 @@ public class UVCCamera {
      *
      * @param ctrlBlock
      */
-    public synchronized void open(final UsbControlBlock ctrlBlock) {
+    public synchronized void open(final UsbControlBlock ctrlBlock,IOpenCallback iOpenCallback) {
         int result;
         try {
             mCtrlBlock = ctrlBlock.clone();
@@ -204,12 +204,16 @@ public class UVCCamera {
             Log.w(TAG, e);
             result = -1;
         }
+
         if (result != 0) {
             throw new UnsupportedOperationException("open failed:result=" + result);
+//            if (iOpenCallback != null) iOpenCallback.onOpen(result);
         }
+
         if (mNativePtr != 0 && TextUtils.isEmpty(mSupportedSize)) {
             mSupportedSize = nativeGetSupportedSize(mNativePtr);
         }
+
         nativeSetPreviewSize(mNativePtr, DEFAULT_PREVIEW_WIDTH, DEFAULT_PREVIEW_HEIGHT,
                 DEFAULT_PREVIEW_MIN_FPS, DEFAULT_PREVIEW_MAX_FPS, DEFAULT_PREVIEW_MODE, DEFAULT_BANDWIDTH);
     }

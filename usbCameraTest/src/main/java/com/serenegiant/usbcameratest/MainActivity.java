@@ -44,6 +44,7 @@ import com.serenegiant.usb.CameraDialog;
 import com.serenegiant.usb.DeviceFilter;
 import com.serenegiant.usb.IButtonCallback;
 import com.serenegiant.usb.IFrameCallback;
+import com.serenegiant.usb.IOpenCallback;
 import com.serenegiant.usb.IStatusCallback;
 import com.serenegiant.usb.USBMonitor;
 import com.serenegiant.usb.USBMonitor.OnDeviceConnectListener;
@@ -52,7 +53,6 @@ import com.serenegiant.usb.UVCCamera;
 import com.serenegiant.widget.PreviewView;
 import com.serenegiant.widget.SimpleUVCCameraTextureView;
 import com.serenegiant.widget.TexturePreviewView;
-
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
@@ -128,24 +128,22 @@ public final class MainActivity extends BaseActivity implements OnClickListener 
 
 
     /**
-
      * getSerialNumber
-
+     *
      * @return result is same to getSerialNumber1()
-
      */
 
-    public static String getSerialNumber(){
+    public static String getSerialNumber() {
 
         String serial = null;
 
         try {
 
-            Class<?> c =Class.forName("android.os.SystemProperties");
+            Class<?> c = Class.forName("android.os.SystemProperties");
 
-            Method get =c.getMethod("get", String.class);
+            Method get = c.getMethod("get", String.class);
 
-            serial = (String)get.invoke(c, "ro.serialno");
+            serial = (String) get.invoke(c, "ro.serialno");
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -254,7 +252,7 @@ public final class MainActivity extends BaseActivity implements OnClickListener 
             releaseCamera();
             queueEvent(() -> {
                 final UVCCamera camera = new UVCCamera();
-                camera.open(ctrlBlock);
+                camera.open(ctrlBlock, new MyOpenBack());
                 camera.setStatusCallback((statusClass, event, selector, statusAttribute, data) -> runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
@@ -273,25 +271,18 @@ public final class MainActivity extends BaseActivity implements OnClickListener 
                         }
                     }
                 }));
-                camera.setButtonCallback(new IButtonCallback() {
-                    @Override
-                    public void onButton(final int button, final int state) {
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                final Toast toast = Toast.makeText(MainActivity.this, "onButton(button=" + button + "; " +
-                                        "state=" + state + ")", Toast.LENGTH_SHORT);
-                                synchronized (mSync) {
-                                    if (mToast != null) {
-                                        mToast.cancel();
-                                    }
-                                    mToast = toast;
-                                    toast.show();
-                                }
-                            }
-                        });
+
+                camera.setButtonCallback((button, state) -> runOnUiThread(() -> {
+                    final Toast toast = Toast.makeText(MainActivity.this, "onButton(button=" + button + "; " +
+                            "state=" + state + ")", Toast.LENGTH_SHORT);
+                    synchronized (mSync) {
+                        if (mToast != null) {
+                            mToast.cancel();
+                        }
+                        mToast = toast;
+                        toast.show();
                     }
-                });
+                }));
 //					camera.setPreviewTexture(camera.getSurfaceTexture());
                 if (mPreviewSurface != null) {
                     mPreviewSurface.release();
@@ -341,6 +332,25 @@ public final class MainActivity extends BaseActivity implements OnClickListener 
         @Override
         public void onCancel(final UsbDevice device) {
 
+        }
+    };
+
+    /**
+     * 打开摄像头回调处理
+     */
+    private class MyOpenBack implements IOpenCallback {
+
+        @Override
+        public void onOpen(int state) {
+            switch (state) {
+                case 0:
+                    break;
+                default:
+//                    updateDevices();
+//                    request_permission();
+//                    Log.e("robin debug","UVC摄像头重启");
+                    break;
+            }
         }
     };
 
@@ -402,6 +412,9 @@ public final class MainActivity extends BaseActivity implements OnClickListener 
             case R.id.circle_button://屏幕旋转0度或者90度
 //                container.setRotation(!istrue == true ? 90: 0);
                 preview_rotation();
+                if (mUVCCamera != null) {
+                    mUVCCamera.stopPreview();
+                }
                 break;
         }
     }

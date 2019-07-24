@@ -61,13 +61,3 @@ dependencies {
 	implementation project(':libuvccamera')
 }
 
-
-task makeJar(type: Copy) {
-	delete 'build/libs/usbCameraCommon.jar'
-	from('build/intermediates/bundles/release/')
-	into('build/libs/')
-	include('classes.jar')
-	rename ('classes.jar', 'usbCameraCommon.jar')
-}
-
-makeJar.dependsOn(build)
